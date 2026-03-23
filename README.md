@@ -16,7 +16,7 @@ Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay 
 3. API orchestration ✅
 4. Olas server mech integration ✅
 5. Olas client mech integration ✅
-6. MoonPay CLI execution adapter
+6. MoonPay CLI execution adapter ✅
 7. Frontend dashboard
 8. E2E flow + load scripts (10 hire / 50 serve)
 9. CI/CD + deployment

@@ -1,11 +1,12 @@
-# Server Mech (Step 4)
+# Server Mech (Step 4 + Step 6)
 
-PolicyPay server-side mech adapter for Olas **Monetize Your Agent** track.
+PolicyPay server-side mech adapter for Olas **Monetize Your Agent** track, now with MoonPay execution adapter.
 
 ## What this does
 - exposes `/mech/serve`
 - opens/accepts/submits/releases jobs through `@policypay/api`
 - anchors receipt hashes on-chain
+- runs MoonPay tool execution in simulation/execute modes
 - tracks served count for proof (`/stats`)
 
 ## Run
@@ -19,7 +20,24 @@ npm run -w @policypay/server-mech dev
 # quick serve test
 curl -X POST http://localhost:4100/mech/serve \
   -H "content-type: application/json" \
-  -d '{"requester":"olas-client-agent","task":"quote+settle usdc","amountEth":"0.0001"}'
+  -d '{
+    "requester":"olas-client-agent",
+    "task":"quote+settle usdc",
+    "amountEth":"0.0001",
+    "moonpay": {
+      "enabled": true,
+      "simulation": true,
+      "tool": "token balance list",
+      "options": {"wallet":"main","chain":"base"}
+    }
+  }'
+```
+
+## MoonPay adapter endpoint
+```bash
+curl -X POST http://localhost:4100/moonpay/run \
+  -H "content-type: application/json" \
+  -d '{"tool":"token balance list","options":{"wallet":"main","chain":"base"},"simulation":true}'
 ```
 
 ## Load for bounty proof
@@ -33,3 +51,7 @@ SERVE_COUNT=50 npm run -w @policypay/server-mech serve:50
 - `SERVER_MECH_PORT` (default `4100`)
 - `POLICYPAY_POLICY_ID` (default `policy/base-sepolia/default`)
 - `SERVER_MECH_BASE` for load script (default `http://localhost:4100`)
+- `MOONPAY_ENABLE_EXECUTION` (`true` to actually run `mp`, otherwise planned/simulated only)
+- `MOONPAY_BIN` (default `mp`)
+- `MOONPAY_TIMEOUT_MS` (default `120000`)
+- `MOONPAY_WALLET_NAME` (default `main`)

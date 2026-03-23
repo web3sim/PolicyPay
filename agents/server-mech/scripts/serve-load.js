@@ -12,7 +12,16 @@ async function run() {
       body: JSON.stringify({
         requester: "olas-client-agent",
         task: `policy-pay-task-${i}`,
-        amountEth: "0.0001"
+        amountEth: "0.0001",
+        moonpay: {
+          enabled: true,
+          simulation: true,
+          tool: "token balance list",
+          options: {
+            wallet: process.env.MOONPAY_WALLET_NAME || "main",
+            chain: "base"
+          }
+        }
       })
     });
     if (resp.ok) ok++;

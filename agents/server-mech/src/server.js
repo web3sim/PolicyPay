@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { z } from "zod";
+import { runMoonPayTool } from "./moonpay.js";
 
 const app = express();
 app.use(express.json());
@@ -14,6 +15,12 @@ const reqSchema = z.object({
   task: z.string().min(3),
   amountEth: z.string().default("0.0001"),
   policyId: z.string().default(DEFAULT_POLICY),
+  moonpay: z.object({
+    enabled: z.boolean().default(true),
+    simulation: z.boolean().default(true),
+    tool: z.string().default("token balance list"),
+    options: z.record(z.any()).default({})
+  }).optional()
 });
 
 const served = {
@@ -33,6 +40,20 @@ app.get("/health", (_req, res) => {
 
 app.get("/stats", (_req, res) => {
   res.json(served);
+});
+
+app.post("/moonpay/run", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const out = await runMoonPayTool({
+      tool: body.tool || "token balance list",
+      options: body.options || {},
+      simulation: body.simulation !== false,
+    });
+    res.json(out);
+  } catch (err) {
+    res.status(400).json({ error: err.message || "moonpay run failed" });
+  }
 });
 
 app.post("/mech/serve", async (req, res) => {
@@ -77,6 +98,15 @@ app.post("/mech/serve", async (req, res) => {
 
     await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobKey)}/release`, { method: "POST" });
 
+    const moonpayReq = parsed.moonpay || { enabled: true, simulation: true, tool: "token balance list", options: {} };
+    const moonpay = moonpayReq.enabled
+      ? await runMoonPayTool({
+          tool: moonpayReq.tool,
+          options: moonpayReq.options,
+          simulation: moonpayReq.simulation,
+        })
+      : { ok: true, mode: "disabled" };
+
     const item = {
       jobId: jobKey,
       requester: parsed.requester,
@@ -84,6 +114,7 @@ app.post("/mech/serve", async (req, res) => {
       requestHash,
       resultHash,
       receiptHash,
+      moonpay,
       createdAt: new Date().toISOString(),
     };
 
