@@ -1,54 +1,122 @@
-# PolicyPay (Olas x MoonPay)
+# PolicyPay — Programmable Payments with Policy Enforcement
 
-Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay execution rails.
+PolicyPay is Web3-native payment infrastructure for automated, policy-governed fund movement.
 
-## Monorepo Layout
-- `apps/web`: Next.js frontend
-- `apps/api`: Backend orchestrator API
-- `packages/contracts`: Solidity contracts + tests
-- `packages/shared`: Shared types/utils
-- `agents/client-mech`: Olas mech-client integration
-- `agents/server-mech`: Olas mech-server tool implementation
+## Overview
+PolicyPay enables deterministic payment execution based on explicit rules instead of manual approval chains.
 
-## Step Roadmap
-1. Bootstrap monorepo + env contract ✅
-2. Contracts (policy + receipts) ✅
-3. API orchestration ✅
-4. Olas server mech integration ✅
-5. Olas client mech integration ✅
-6. MoonPay CLI execution adapter ✅
-7. Frontend dashboard ✅
-8. E2E flow + load scripts (10 hire / 20 serve target for demo)
-9. CI/CD + deployment ✅
-10. Submission artifacts
+### Problem
+Traditional and onchain payment workflows often rely on:
+- Manual payment operations
+- Ad-hoc conditional logic
+- Trust-based escrow and release decisions
 
-## Required Secrets (to be provided)
-See `.env.example`.
+This creates operational risk, delayed settlements, and inconsistent execution.
 
-## Contracts (Step 2)
+### Solution
+PolicyPay introduces:
+- Policy-based automation for payout rules
+- Escrow-enforced fund control
+- Deterministic execution paths for release/refund/slash outcomes
+
+## Key Features
+- Policy-based payment execution
+- Conditional payouts (time, event, verification-driven)
+- Escrow-controlled funds
+- Smart contract enforced state transitions
+- Automation-ready workflows for agents and applications
+
+## Use Cases
+- DAO contributor payroll
+- Milestone-based contractor payments
+- Subscription and recurring settlements
+- Autonomous agent-to-agent payouts
+
+## How It Works
+1. Define a payment policy
+2. Lock funds into escrow
+3. Monitor and evaluate policy conditions
+4. Execute payout path (release/refund/slash)
+
+## Getting Started
+### Prerequisites
+- Node.js 22+
+- npm 10+
+- Base Sepolia RPC endpoint
+- Test wallet private key
+- MoonPay CLI auth (for real payment tool execution)
+
+### Installation
 ```bash
-npm i
-npm run -w @policypay/contracts build
-npm run -w @policypay/contracts test
-npm run -w @policypay/contracts deploy:base-sepolia
+git clone https://github.com/web3sim/PolicyPay.git
+cd PolicyPay
+npm install
 ```
 
-Contracts shipped in Step 2:
-- `PolicyPayCore` - policy registry, escrow job lifecycle, receipt anchoring.
-
-## API (Step 3)
+### Environment Variables
+Create a local `.env` file:
 ```bash
-# start API
+BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+DEPLOYER_PRIVATE_KEY=0x...
+POLICY_PAY_CORE_ADDRESS=0x051cAD2fcf7D1ff415c35a8090f0507D454bd608
+API_PORT=4000
+SERVER_MECH_PORT=4100
+POLICYPAY_API_BASE=http://localhost:4000
+MOONPAY_ENABLE_EXECUTION=true
+MOONPAY_BIN=./node_modules/.bin/mp
+MOONPAY_WALLET_NAME=main
+```
+
+### Run Locally
+```bash
+# Terminal 1
 npm run -w @policypay/api dev
 
-# health
-curl http://localhost:4000/health
+# Terminal 2
+npm run -w @policypay/server-mech dev
 
-# read policy (id can be raw string or 0x bytes32)
-curl http://localhost:4000/policies/policy/base-sepolia/default
+# Terminal 3
+npm run -w @policypay/web dev
 ```
 
-Core endpoints:
+## Usage
+### Create Policy (deployed default policy exists)
+Policy setup is handled in contract deployment scripts and can be extended via API/contract calls.
+
+### Fund Escrow / Open Job
+```bash
+curl -X POST http://localhost:4000/jobs/open \
+  -H "content-type: application/json" \
+  -d '{
+    "jobId":"job/demo/1",
+    "policyId":"policy/base-sepolia/default",
+    "requestHash":"request/demo/1",
+    "amountEth":"0.0001"
+  }'
+```
+
+### Trigger Conditions / Serve Request
+```bash
+curl -X POST http://localhost:4100/mech/serve \
+  -H "content-type: application/json" \
+  -d '{
+    "requester":"olas-client-agent",
+    "task":"settle demo payout",
+    "amountEth":"0.0001",
+    "moonpay": {
+      "enabled": true,
+      "simulation": false,
+      "tool": "token balance list",
+      "options": {"wallet":"main","chain":"base-sepolia"}
+    }
+  }'
+```
+
+### Execute Payout Path
+The lifecycle executes through contract-backed endpoints (`accept`, `submit`, `anchor`, `release`).
+
+## API / SDK
+### Core HTTP Endpoints
 - `GET /health`
 - `GET /config`
 - `GET /policies/:policyId`
@@ -60,32 +128,32 @@ Core endpoints:
 - `POST /jobs/:jobId/release`
 - `POST /jobs/:jobId/refund`
 
-## Frontend (Step 7)
+### Example: Read Policy
 ```bash
-npm run -w @policypay/web dev
+curl http://localhost:4000/policies/policy/base-sepolia/default
 ```
 
-Uses Next.js **16.2.1** with App Router.
-Landing page includes:
-- hero pitch section
-- live API health + contract telemetry
-- Olas served request counter
-- latest MoonPay execution mode/command
-- recent job log panel
+## Tech Stack
+- Solidity (EVM, Base Sepolia)
+- Node.js backend services
+- Next.js 16 frontend
+- ethers.js + Hardhat
+- Olas mech client/server integrations
+- MoonPay CLI execution adapter
 
-## E2E (Step 8)
-```bash
-DEPLOYER_PRIVATE_KEY=... MOONPAY_ENABLE_EXECUTION=true ./scripts/run-e2e.sh
-```
-Creates proof artifacts under `artifacts/`.
+## Roadmap
+- Complete Pearl integration path
+- Add richer policy composition primitives
+- Expand multi-chain support
+- Add production relayer queueing and observability
 
-## CI/CD + Deployment (Step 9)
-- CI: `.github/workflows/ci.yml`
-- Preview deploy check: `.github/workflows/deploy-preview.yml`
-- Docker: `apps/api/Dockerfile`, `apps/web/Dockerfile`
-- Compose: `docker-compose.yml`
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for behavior changes
+4. Submit a pull request with a clear scope
 
-## Submission Assets (Step 10)
-- Demo script: `docs/submission/DEMO_SCRIPT.md`
-- Bounty mapping: `docs/submission/BOUNTY_MAPPING.md`
-- Proof checklist: `docs/submission/PROOF_CHECKLIST.md`
+## License
+MIT
+
+PolicyPay makes autonomous, rule-enforced payments operational for real-world Web3 systems.
