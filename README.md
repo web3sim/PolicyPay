@@ -84,3 +84,8 @@ Creates proof artifacts under `artifacts/`.
 - Preview deploy check: `.github/workflows/deploy-preview.yml`
 - Docker: `apps/api/Dockerfile`, `apps/web/Dockerfile`
 - Compose: `docker-compose.yml`
+
+## Submission Assets (Step 10)
+- Demo script: `docs/submission/DEMO_SCRIPT.md`
+- Bounty mapping: `docs/submission/BOUNTY_MAPPING.md`
+- Proof checklist: `docs/submission/PROOF_CHECKLIST.md`
