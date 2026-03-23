@@ -10,6 +10,7 @@
     "serve:50": "node scripts/serve-load.js"
   },
   "dependencies": {
+    "@moonpay/cli": "^1.12.4",
     "dotenv": "^17.3.1",
     "express": "^4.21.2",
     "zod": "^3.25.76"

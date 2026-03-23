@@ -1,0 +1,17 @@
+name: deploy-preview
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run -w @policypay/contracts test
+      - run: npm run -w @policypay/web build
+      - name: Docker compose config check
+        run: docker compose config

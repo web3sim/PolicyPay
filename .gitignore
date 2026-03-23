@@ -7,5 +7,6 @@ dist
 coverage
 packages/contracts/artifacts
 packages/contracts/cache
+artifacts
 .DS_Store
 npm-debug.log*

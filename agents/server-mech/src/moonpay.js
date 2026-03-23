@@ -18,7 +18,7 @@ export async function runMoonPayTool({
   options = {},
   simulation = true,
 }) {
-  const bin = process.env.MOONPAY_BIN || "mp";
+  const bin = process.env.MOONPAY_BIN || "./node_modules/.bin/mp";
   const canExecute = process.env.MOONPAY_ENABLE_EXECUTION === "true";
 
   if (!canExecute) {

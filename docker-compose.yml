@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      API_PORT: 4000
+      BASE_SEPOLIA_RPC_URL: ${BASE_SEPOLIA_RPC_URL}
+      DEPLOYER_PRIVATE_KEY: ${DEPLOYER_PRIVATE_KEY}
+      POLICY_PAY_CORE_ADDRESS: ${POLICY_PAY_CORE_ADDRESS}
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+      NEXT_PUBLIC_SERVER_MECH_BASE: http://localhost:4100
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api

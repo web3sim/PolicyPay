@@ -26,19 +26,43 @@ const enqueueWrite = (fn) => {
   return writeQueue;
 };
 
-const withNonceRetry = async (txFactory) => {
-  try {
-    const tx = await txFactory();
-    return tx.wait();
-  } catch (e) {
-    const msg = String(e?.message || "");
-    if (!msg.includes("NONCE_EXPIRED") && !msg.includes("nonce has already been used") && !msg.includes("nonce too low")) {
-      throw e;
-    }
-    await new Promise((r) => setTimeout(r, 1200));
-    const tx = await txFactory();
-    return tx.wait();
+let nextNonce = null;
+const resetNonce = () => { nextNonce = null; };
+
+const takeNonce = async () => {
+  if (!signer) throw new Error("Missing signer");
+  if (nextNonce === null) {
+    nextNonce = await signer.getTransactionCount("pending");
   }
+  const current = nextNonce;
+  nextNonce += 1;
+  return current;
+};
+
+const isNonceLikeError = (msg) => (
+  msg.includes("NONCE_EXPIRED") ||
+  msg.includes("nonce has already been used") ||
+  msg.includes("nonce too low") ||
+  msg.includes("REPLACEMENT_UNDERPRICED") ||
+  msg.includes("replacement transaction underpriced")
+);
+
+const sendWithManagedNonce = async (sendFn) => {
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const nonce = await takeNonce();
+    try {
+      const tx = await sendFn({ nonce });
+      return await tx.wait();
+    } catch (e) {
+      lastErr = e;
+      const msg = String(e?.message || "");
+      if (!isNonceLikeError(msg)) throw e;
+      resetNonce();
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+  }
+  throw lastErr || new Error("Failed to send transaction");
 };
 
 const asHex32 = (value) => {
@@ -110,18 +134,18 @@ app.post("/jobs/open", safe(async (req, res) => {
     throw new Error("jobId, policyId, requestHash, amountEth are required");
   }
 
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.openJob(
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.openJob(
     asHex32(jobId),
     asHex32(policyId),
     asHex32(requestHash),
-    { value: ethers.utils.parseEther(String(amountEth)) }
+    { value: ethers.utils.parseEther(String(amountEth)), ...overrides }
   )));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 
 app.post("/jobs/:jobId/accept", safe(async (req, res) => {
   requireWriter();
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.acceptJob(asHex32(req.params.jobId))));
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.acceptJob(asHex32(req.params.jobId), overrides)));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 
@@ -129,7 +153,7 @@ app.post("/jobs/:jobId/submit", safe(async (req, res) => {
   requireWriter();
   const { resultHash } = req.body || {};
   if (!resultHash) throw new Error("resultHash is required");
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.submitResult(asHex32(req.params.jobId), asHex32(resultHash))));
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.submitResult(asHex32(req.params.jobId), asHex32(resultHash), overrides)));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 
@@ -137,19 +161,19 @@ app.post("/receipts/anchor", safe(async (req, res) => {
   requireWriter();
   const { jobId, receiptHash } = req.body || {};
   if (!jobId || !receiptHash) throw new Error("jobId and receiptHash are required");
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.anchorReceipt(asHex32(receiptHash), asHex32(jobId))));
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.anchorReceipt(asHex32(receiptHash), asHex32(jobId), overrides)));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 
 app.post("/jobs/:jobId/release", safe(async (req, res) => {
   requireWriter();
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.release(asHex32(req.params.jobId))));
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.release(asHex32(req.params.jobId), overrides)));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 
 app.post("/jobs/:jobId/refund", safe(async (req, res) => {
   requireWriter();
-  const receipt = await enqueueWrite(() => withNonceRetry(() => writeContract.refund(asHex32(req.params.jobId))));
+  const receipt = await enqueueWrite(() => sendWithManagedNonce((overrides) => writeContract.refund(asHex32(req.params.jobId), overrides)));
   res.json({ ok: true, txHash: receipt.transactionHash });
 }));
 

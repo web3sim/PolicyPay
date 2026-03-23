@@ -18,8 +18,8 @@ Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay 
 5. Olas client mech integration ✅
 6. MoonPay CLI execution adapter ✅
 7. Frontend dashboard ✅
-8. E2E flow + load scripts (10 hire / 50 serve)
-9. CI/CD + deployment
+8. E2E flow + load scripts (10 hire / 20 serve target for demo)
+9. CI/CD + deployment ✅
 10. Submission artifacts
 
 ## Required Secrets (to be provided)
@@ -72,3 +72,15 @@ Landing page includes:
 - Olas served request counter
 - latest MoonPay execution mode/command
 - recent job log panel
+
+## E2E (Step 8)
+```bash
+DEPLOYER_PRIVATE_KEY=... MOONPAY_ENABLE_EXECUTION=true ./scripts/run-e2e.sh
+```
+Creates proof artifacts under `artifacts/`.
+
+## CI/CD + Deployment (Step 9)
+- CI: `.github/workflows/ci.yml`
+- Preview deploy check: `.github/workflows/deploy-preview.yml`
+- Docker: `apps/api/Dockerfile`, `apps/web/Dockerfile`
+- Compose: `docker-compose.yml`
