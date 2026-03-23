@@ -13,14 +13,20 @@ const RPC_URL = process.env.BASE_SEPOLIA_RPC_URL || process.env.OLAS_RPC_URL || 
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.OLAS_PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.POLICY_PAY_CORE_ADDRESS || "0x051cAD2fcf7D1ff415c35a8090f0507D454bd608";
 
+console.log(`[API Init] PORT=${API_PORT}, RPC=${RPC_URL}, CONTRACT=${CONTRACT_ADDRESS}`);
+
 if (!PRIVATE_KEY) {
   console.warn("[policypay-api] Missing DEPLOYER_PRIVATE_KEY/OLAS_PRIVATE_KEY. Write endpoints will fail.");
+} else {
+  console.log(`[API Init] Signer initialized`);
 }
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 const signer = PRIVATE_KEY ? new ethers.Wallet(PRIVATE_KEY, provider) : null;
 const readContract = new ethers.Contract(CONTRACT_ADDRESS, POLICY_PAY_CORE_ABI, provider);
 const writeContract = signer ? new ethers.Contract(CONTRACT_ADDRESS, POLICY_PAY_CORE_ABI, signer) : null;
+
+console.log(`[API Init] Provider connected, Read contract initialized, Write contract: ${writeContract ? 'YES' : 'NO'}`);
 
 let writeQueue = Promise.resolve();
 const enqueueWrite = (fn) => {
@@ -180,5 +186,8 @@ app.post("/jobs/:jobId/refund", safe(async (req, res) => {
 }));
 
 app.listen(API_PORT, () => {
-  console.log(`PolicyPay API listening on :${API_PORT}`);
+  console.log(`[API Ready] PolicyPay API listening on :${API_PORT}`);
+  console.log(`[API Ready] RPC: ${RPC_URL}`);
+  console.log(`[API Ready] Contract: ${CONTRACT_ADDRESS}`);
+  console.log(`[API Ready] Signer: ${signer ? signer.address : 'NONE (read-only)'}`);
 });

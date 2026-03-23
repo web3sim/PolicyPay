@@ -14,8 +14,8 @@ type Stats = {
   }>;
 };
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
-const MECH = process.env.NEXT_PUBLIC_SERVER_MECH_BASE || 'http://localhost:4100';
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://policypayapi-production.up.railway.app';
+const MECH = process.env.NEXT_PUBLIC_SERVER_MECH_BASE || 'https://policypayserver-mech-production.up.railway.app';
 const FALLBACK_CONTRACT = '0x051cAD2fcf7D1ff415c35a8090f0507D454bd608';
 
 export default function Dashboard() {
@@ -64,7 +64,16 @@ export default function Dashboard() {
   }, []);
 
   const contract = useMemo(() => health?.contract || config?.contractAddress || FALLBACK_CONTRACT, [health, config]);
-  const latestMoonpay = stats?.jobs?.[0]?.moonpay;
+  const latestJob = useMemo(() => {
+    if (!stats?.jobs?.length) return null;
+    return stats.jobs[stats.jobs.length - 1];
+  }, [stats]);
+  const latestMoonpay = latestJob?.moonpay;
+  const moonpayMode = useMemo(() => {
+    if (!mechOk) return 'OFFLINE';
+    if (!stats?.jobs?.length) return 'NO DATA';
+    return (latestMoonpay?.mode || 'UNKNOWN').toUpperCase();
+  }, [latestMoonpay, mechOk, stats]);
 
   return (
     <div className="grid">
@@ -84,9 +93,10 @@ export default function Dashboard() {
 
       <div className="card">
         <h3>MoonPay Execution</h3>
-        <div className="kpi">{(latestMoonpay?.mode || 'UNKNOWN').toUpperCase()}</div>
+        <div className="kpi">{moonpayMode}</div>
         <div className="small">Latest command:</div>
         <div className="small">{latestMoonpay?.command || latestMoonpay?.plannedCommand || 'No command captured yet'}</div>
+        <div className="small">Latest job: {latestJob?.jobId || 'none'}</div>
       </div>
 
       <div className="card" style={{ gridColumn: '1 / -1' }}>
