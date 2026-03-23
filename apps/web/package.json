@@ -1,0 +1,10 @@
+{
+  "name": "@policypay/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Next.js scaffold in Step 2'",
+    "build": "echo build web",
+    "test": "echo no-tests-yet"
+  }
+}

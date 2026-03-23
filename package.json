@@ -1,0 +1,16 @@
+{
+  "name": "policypay",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "agents/*"
+  ],
+  "scripts": {
+    "build": "npm run -ws build --if-present",
+    "dev": "echo 'Run per-workspace dev scripts'",
+    "lint": "npm run -ws lint --if-present",
+    "test": "npm run -ws test --if-present"
+  }
+}

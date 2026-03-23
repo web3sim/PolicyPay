@@ -1,0 +1,9 @@
+{
+  "name": "@policypay/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Hardhat scaffold in Step 2'",
+    "test": "echo 'Contract tests in Step 2'"
+  }
+}
