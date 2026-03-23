@@ -1,0 +1,16 @@
+{
+  "name": "@policypay/client-mech",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/client.js",
+    "hire:10": "node scripts/hire-load.js",
+    "build": "echo build client-mech",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "zod": "^3.25.76"
+  }
+}
