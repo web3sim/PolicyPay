@@ -13,8 +13,8 @@ Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay 
 ## Step Roadmap
 1. Bootstrap monorepo + env contract ✅
 2. Contracts (policy + receipts) ✅
-3. API orchestration (in progress)
-4. Olas server mech integration
+3. API orchestration ✅
+4. Olas server mech integration ✅
 5. Olas client mech integration
 6. MoonPay CLI execution adapter
 7. Frontend dashboard
