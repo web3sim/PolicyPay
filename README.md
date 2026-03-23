@@ -17,7 +17,7 @@ Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay 
 4. Olas server mech integration ✅
 5. Olas client mech integration ✅
 6. MoonPay CLI execution adapter ✅
-7. Frontend dashboard
+7. Frontend dashboard ✅
 8. E2E flow + load scripts (10 hire / 50 serve)
 9. CI/CD + deployment
 10. Submission artifacts
@@ -59,3 +59,16 @@ Core endpoints:
 - `POST /receipts/anchor`
 - `POST /jobs/:jobId/release`
 - `POST /jobs/:jobId/refund`
+
+## Frontend (Step 7)
+```bash
+npm run -w @policypay/web dev
+```
+
+Uses Next.js **16.2.1** with App Router.
+Landing page includes:
+- hero pitch section
+- live API health + contract telemetry
+- Olas served request counter
+- latest MoonPay execution mode/command
+- recent job log panel
