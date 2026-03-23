@@ -24,3 +24,14 @@ Policy-constrained agent payments with Olas mech-client/mech-server and MoonPay 
 
 ## Required Secrets (to be provided)
 See `.env.example`.
+
+## Contracts (Step 2)
+```bash
+npm i
+npm run -w @policypay/contracts build
+npm run -w @policypay/contracts test
+npm run -w @policypay/contracts deploy:base-sepolia
+```
+
+Contracts shipped in Step 2:
+- `PolicyPayCore` - policy registry, escrow job lifecycle, receipt anchoring.
