@@ -7,5 +7,10 @@
     "dev": "node src/index.js",
     "build": "echo build api",
     "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "ethers": "^5.8.0",
+    "express": "^4.21.2"
   }
 }
