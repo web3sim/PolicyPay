@@ -1,9 +1,11 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { ethers } from "ethers";
 import { POLICY_PAY_CORE_ABI } from "./abi.js";
 
 const app = express();
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const API_PORT = Number(process.env.API_PORT || 4000);

@@ -1,9 +1,11 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { z } from "zod";
 import { runMoonPayTool } from "./moonpay.js";
 
 const app = express();
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const PORT = Number(process.env.SERVER_MECH_PORT || 4100);
