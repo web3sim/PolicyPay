@@ -1,0 +1,6 @@
+PolicyPay terminal demo.
+First, we check API health on Railway and confirm Base Sepolia contract connectivity.
+Second, we verify server mech health and total served requests.
+Third, we run MoonPay command execution check through the mech endpoint.
+Finally, we inspect live stats and confirm request telemetry with receipt hashes.
+This demonstrates a real policy driven payment workflow with operational observability.
