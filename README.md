@@ -13,7 +13,7 @@
                  ││                      ││
    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
-*Show the world you support this repo! [Change this message at markee.xyz](https://markee.xyz/ecosystem/platforms/github/0xcb4108cb6900a09a51176ef1f1ec9b1141d7179f) ^*
+*Show the world you support this repo! [Change this message at markee.xyz](https://markee.xyz/markee/0xcb4108cb6900a09a51176ef1f1ec9b1141d7179f) ^*
 <!-- MARKEE:END:0xcb4108cb6900a09a51176ef1f1ec9b1141d7179f -->
 # PolicyPay — Programmable Payments with Policy Enforcement
 
